@@ -1,0 +1,85 @@
+# ===========================
+# SYMFONY (Backend)
+# ===========================
+/backend/.env.local
+/backend/.env.local.php
+/backend/.env.*.local
+/backend/var/
+/backend/vendor/
+/backend/public/bundles/
+/backend/config/jwt/private.pem
+/backend/config/jwt/public.pem
+
+# ===========================
+# ANGULAR (Frontend)
+# ===========================
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.angular/
+/frontend/.sass-cache/
+/frontend/connect.lock
+/frontend/coverage/
+/frontend/.nyc_output/
+/frontend/libpeerconnection.log
+/frontend/npm-debug.log
+/frontend/yarn-error.log
+/frontend/testem.log
+/frontend/typings/
+/frontend/.env
+/frontend/.env.*
+
+# ===========================
+# DOCKER
+# ===========================
+/docker/db/data/
+.env.docker.local
+
+# ===========================
+# IDE & EDITORS
+# ===========================
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.iml
+.DS_Store
+Thumbs.db
+
+# ===========================
+# OS
+# ===========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ===========================
+# LOGS & TEMP
+# ===========================
+*.log
+*.tmp
+*.temp
+*.cache
+*.pid
+*.seed
+*.pid.lock
+
+# ===========================
+# TESTS & COVERAGE
+# ===========================
+/frontend/coverage/
+/backend/coverage/
+*.lcov
+
+# ===========================
+# PROD BUILD
+# ===========================
+/frontend/dist/
+/backend/public/build/
