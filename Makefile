@@ -5,7 +5,7 @@ install:
 	@echo "Installation des dépendances et démarrage des conteneurs..."
 	sudo docker compose up -d
 	sudo docker compose exec backend composer install
-	sudo docker compose exec frontend npm install
+	@echo "Le frontend installe ses dépendances npm tout seul au démarrage (voir la commande du service frontend)."
 	@echo "Configuration de la base de données..."
 	sudo docker compose exec backend php bin/console doctrine:database:create --if-not-exists
 	sudo docker compose exec backend php bin/console doctrine:migrations:migrate -n
