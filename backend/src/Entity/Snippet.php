@@ -7,34 +7,61 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Attribute\Groups;
+use ApiPlatform\Metadata\{ApiResource, ApiFilter, GetCollection, Get, Post, Put, Patch, Delete};
+use ApiPlatform\Doctrine\Orm\Filter\{SearchFilter, OrderFilter};
 
 #[ORM\Entity(repositoryClass: SnippetRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext:   ['groups' => ['snippet:read']],
+    denormalizationContext: ['groups' => ['snippet:write']],
+    operations: [
+        new GetCollection(security: "is_granted('ROLE_USER')"),
+        new Get(security: "is_granted('ROLE_USER')"),
+        new Post(security: "is_granted('ROLE_USER')"),
+        new Put(security: "object.getOwner() == user"),
+        new Patch(security: "object.getOwner() == user"),
+        new Delete(security: "object.getOwner() == user"),
+    ]
+)]
+#[ApiFilter(SearchFilter::class, properties: [
+    'title'       => 'ipartial',
+    'description' => 'ipartial',
+    'code'        => 'ipartial',
+    'owner'       => 'exact',
+    'folders'     => 'exact',
+])]
+#[ApiFilter(OrderFilter::class, properties: ['id', 'title'])]
 class Snippet
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['snippet:read'])]
     private ?int $id = null;
 
+    #[Groups(['snippet:read', 'snippet:write'])]
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
+    #[Groups(['snippet:read', 'snippet:write'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $code = null;
 
+    #[Groups(['snippet:read', 'snippet:write'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
     #[ORM\ManyToOne(inversedBy: 'snippets')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['snippet:read'])]
     private ?User $owner = null;
 
     /**
      * @var Collection<int, Folder>
      */
     #[ORM\ManyToMany(targetEntity: Folder::class, mappedBy: 'snippets')]
+    #[Groups(['snippet:read', 'snippet:write'])]
     private Collection $folders;
 
     public function __construct()

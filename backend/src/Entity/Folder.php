@@ -7,31 +7,55 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Attribute\Groups;
+use ApiPlatform\Metadata\{ApiResource, ApiFilter, GetCollection, Get, Post, Put, Patch, Delete};
+use ApiPlatform\Doctrine\Orm\Filter\{SearchFilter, OrderFilter};
 
 #[ORM\Entity(repositoryClass: FolderRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext:   ['groups' => ['folder:read']],
+    denormalizationContext: ['groups' => ['folder:write']],
+    operations: [
+        new GetCollection(security: "is_granted('ROLE_USER')"),
+        new Get(security: "is_granted('ROLE_USER')"),
+        new Post(security: "is_granted('ROLE_USER')"),
+        new Put(security: "object.getOwner() == user"),
+        new Patch(security: "object.getOwner() == user"),
+        new Delete(security: "object.getOwner() == user"),
+    ]
+)]
+#[ApiFilter(SearchFilter::class, properties: [
+    'title'       => 'ipartial',
+    'description' => 'ipartial',
+    'owner'       => 'exact',
+])]
+#[ApiFilter(OrderFilter::class, properties: ['id', 'title'])]
 class Folder
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['folder:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['folder:read', 'folder:write'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['folder:read', 'folder:write'])]
     private ?string $description = null;
 
     #[ORM\ManyToOne(inversedBy: 'folders')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['folder:read'])]
     private ?User $owner = null;
 
     /**
      * @var Collection<int, Snippet>
      */
     #[ORM\ManyToMany(targetEntity: Snippet::class, inversedBy: 'folders')]
+    #[Groups(['folder:read', 'folder:write'])]
     private Collection $snippets;
 
     public function __construct()
