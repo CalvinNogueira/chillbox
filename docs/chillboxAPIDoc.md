@@ -159,7 +159,7 @@ Deux interfaces, une par type d'opération :
 - `GET` collection → uniquement les ressources du user connecté ;
 - `GET /{id}` d'une ressource d'autrui → **404** (pas 403 : on ne révèle même pas que l'id existe) ;
 - Idem pour PUT/PATCH/DELETE sur la ressource d'autrui → 404 ;
-- Sans auth branchée, `getUser()` renvoie `null` → `owner = NULL` ne matche jamais en SQL → liste vide. Comportement sûr par défaut.
+- Le `user` vient du token JWT (§6). Sans token valide, le firewall renvoie 401 avant même d'arriver ici.
 
 **Pour ajouter une entité au filtrage** : ajouter sa classe dans le `in_array()` de `filterByOwner()` — à condition qu'elle ait un champ `owner`.
 
@@ -174,9 +174,37 @@ Deux interfaces, une par type d'opération :
 
 ---
 
-## 6. Authentification — pas encore en place
+## 6. Authentification — JWT (Lexik) ✅
 
-`security.yaml` n'a aucun authenticator sur le firewall `main`. Conséquence : `is_granted('ROLE_USER')` échoue toujours → **toutes les routes Snippet renvoient 403 actuellement**. C'est le prochain gros chantier (JWT ou `json_login`).
+Stack : `lexik/jwt-authentication-bundle`, tokens signés RS256, durée de vie 1h.
+
+### Se connecter et consommer l'API
+
+```bash
+# 1. Login → récupère un token
+curl -X POST http://localhost:8000/api/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"demo@chillbox.dev","password":"password"}'
+# → {"token": "eyJ..."}
+
+# 2. Toute requête suivante : le token dans le header Authorization
+curl http://localhost:8000/api/snippets -H "Authorization: Bearer eyJ..."
+```
+
+Sans token / token invalide ou expiré → **401** avant même d'atteindre les entités.
+
+### Comment c'est branché
+
+- **Clés** : `config/jwt/private.pem` (signe les tokens) et `public.pem` (vérifie). Gitignorées — générées par `make install` (`lexik:jwt:generate-keypair --skip-if-exists`). La clé privée est protégée par `JWT_PASSPHRASE` (`.env`).
+- **Firewalls** (`security.yaml`, l'ordre compte — premier pattern qui matche gagne) :
+  - `login` (`^/api/login`) : le guichet. `json_login` lit `{email, password}`, vérifie le hash via le provider, et les handlers Lexik renvoient `{"token": ...}` au lieu de créer une session.
+  - `api` (`^/api`) : le contrôleur. `jwt: ~` lit le header `Authorization: Bearer`, vérifie signature + expiration avec la clé publique, recharge le `User` depuis le `username` du payload. **C'est lui qui remplit le `user`** des expressions `security` et de l'`OwnerExtension`.
+  - Les deux sont `stateless: true` : aucune session, aucun cookie, chaque requête présente son badge.
+- **Route** : `api_login` dans `config/routes.yaml` — aucun contrôleur derrière, le firewall intercepte tout.
+
+### Rappels JWT
+
+Le payload du token est du base64 **lisible par tous** (pas chiffré) — jamais de secret dedans. Ce qui est garanti, c'est l'**authenticité** : impossible de fabriquer ou modifier un token sans la clé privée. Pas de révocation possible avant l'`exp` → durée de vie courte.
 
 ---
 
@@ -184,10 +212,9 @@ Deux interfaces, une par type d'opération :
 
 | Tâche | Pourquoi | Quand |
 | --- | --- | --- |
-| Authentification (JWT ou session) | Rien n'est utilisable sans ; `user` est vide dans les expressions security | Prochain chantier |
-| State processor pour `owner` (Snippet **et** Folder) | Au POST, `owner` reste `null` (non-écrivable par le client, non rempli par le serveur) → erreur 500 SQL. Le processor fera `setOwner($security->getUser())` juste avant la persistance | Avec l'auth |
-| Validation (`#[Assert\NotBlank]` sur `title`, `code`…) | Un POST invalide doit donner un 422 propre, pas une 500 SQL | Après l'auth |
-| Sécuriser `User` (cacher `password`, restreindre les opérations) | Fuite du hash actuellement, voir §3.3 | Avec l'auth |
+| State processor pour `owner` (Snippet **et** Folder) | Au POST, `owner` reste `null` (non-écrivable par le client, non rempli par le serveur) → erreur 500 SQL. Le processor fera `setOwner($security->getUser())` juste avant la persistance | Prochain chantier |
+| Sécuriser `User` (cacher `password`, restreindre les opérations, inscription avec hash du password) | Fuite du hash actuellement, voir §3.3 | Prochain chantier |
+| Validation (`#[Assert\NotBlank]` sur `title`, `code`…) | Un POST invalide doit donner un 422 propre, pas une 500 SQL | Quand on veut |
 
 ---
 
@@ -214,3 +241,4 @@ docker compose exec backend php bin/console doctrine:fixtures:load --no-interact
 | 2026-07-02 | Création du document. API Snippet : opérations + groupes + filtres + extension de filtrage par owner (collection et item) |
 | 2026-07-02 | API Folder configurée (groupes `folder:*`, sécurité, filtres, `owner` en lecture seule). Extension renommée `OwnerExtension` et étendue à Folder |
 | 2026-07-02 | Fixtures et factories (Foundry) : comptes `demo`/`other@chillbox.dev`, dossiers et snippets de test (§8) |
+| 2026-07-02 | Login JWT (Lexik) : firewalls `login` + `api`, clés RS256, génération des clés dans `make install`. Testé de bout en bout : 401 sans token, cloisonnement par owner effectif (§6) |

@@ -237,4 +237,4 @@ Traduction en français : _« API pour les snippets. On expose les champs du gro
 | `ApiFilter` | _Comment chercher/trier_ dans la liste ? |
 | Extensions  | _Quelles lignes_ de la base ce user voit-il ? |
 
-Pour passer à la pratique, il te faudra un système de login (probablement JWT) pour que `user` soit rempli dans les expressions `security`.
+Le `user` de ces expressions est rempli par le login JWT : voir la section 6 de [`chillboxAPIDoc.md`](./chillboxAPIDoc.md) pour le fonctionnement complet (guichet `/api/login`, firewall `api`, clés RS256).
