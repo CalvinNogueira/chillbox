@@ -117,9 +117,28 @@ Identiques à Snippet : GetCollection/Get/Post réservées à `ROLE_USER`, Put/P
 
 Recherche `ipartial` sur `title`/`description`, `exact` sur `owner`, tri par `id` ou `title` (`?order[title]=desc`).
 
-### 3.3 User — `/api/users` 🔴 brute et dangereuse
+### 3.3 User — `/api/users` ✅ configurée (volontairement minimale)
 
-Fichier : `backend/src/Entity/User.php`. Juste `#[ApiResource]` : sans groupes de sérialisation, `GET /api/users` expose **le hash du password et les roles**, et n'importe qui peut POST/DELETE des users. À traiter en priorité quand on s'occupe de l'auth (au minimum : groupes pour cacher `password`, restreindre les opérations).
+Fichier : `backend/src/Entity/User.php`. Deux opérations seulement :
+
+| Verbe | URL | Sécurité | Notes |
+| --- | --- | --- | --- |
+| POST | `/api/users` | **publique** (`PUBLIC_ACCESS`) | L'inscription. Le password arrive en clair dans le body et est hashé par `UserPasswordProcessor` (§4) |
+| GET | `/api/users/{id}` | `object == user` | Son propre profil uniquement — celui d'un autre → 403 |
+
+Pas de GetCollection (personne ne liste les users → 405), pas de Put/Patch/Delete pour l'instant (à ajouter si on fait une page « mon compte »).
+
+#### Champs
+
+| Champ | Lecture (`user:read`) | Écriture (`user:write`) | Remarque |
+| --- | --- | --- | --- |
+| `id` | ✅ | ❌ | |
+| `email` | ✅ | ✅ | `Assert\NotBlank` + `Assert\Email` + `UniqueEntity` (doublon → 422) |
+| `password` | ❌ **jamais** | ✅ | Write-only : entre en clair, hashé avant persistance, ne ressort jamais |
+| `roles` | ❌ | ❌ | Aucun groupe = invisible. `getRoles()` ajoute `ROLE_USER` de toute façon |
+| `snippets` / `folders` | ❌ | ❌ | Invisibles — on passe par `/api/snippets` et `/api/folders` (déjà filtrés par owner) |
+
+Validation : password `Assert\Length(min: 8)`. La validation (étape 5 du pipeline §2) s'exécute **avant** le processor (étape 6), donc c'est bien le mot de passe en clair qui est mesuré, pas le hash.
 
 ---
 
@@ -174,6 +193,10 @@ Le problème symétrique de l'extension, mais en **écriture** : au POST, `owner
 
 **Vérifié** : un POST avec `"owner": "/api/users/2"` dans le payload est ignoré (pas dans le groupe write) et le snippet est quand même attribué au user connecté.
 
+### `State/UserPasswordProcessor.php`
+
+Même pattern exactement, pour l'inscription : le client envoie son password **en clair** dans le body (HTTPS obligatoire en prod), le processor le remplace par son hash bcrypt (`UserPasswordHasherInterface`), puis délègue la persistance. Branché sur le `Post` de `User`. On ne stocke jamais le clair, et le groupe `user:write`-seul sur `password` garantit qu'il ne ressort jamais en lecture.
+
 ---
 
 ## 5. Conventions
@@ -223,8 +246,8 @@ Le payload du token est du base64 **lisible par tous** (pas chiffré) — jamais
 
 | Tâche | Pourquoi | Quand |
 | --- | --- | --- |
-| Sécuriser `User` (cacher `password`, restreindre les opérations, inscription avec hash du password) | Fuite du hash actuellement, voir §3.3 | Prochain chantier |
-| Validation (`#[Assert\NotBlank]` sur `title`, `code`…) | Un POST invalide doit donner un 422 propre, pas une 500 SQL | Quand on veut |
+| Validation sur Snippet et Folder (`#[Assert\NotBlank]` sur `title`, `code`…) | Un POST invalide doit donner un 422 propre, pas une 500 SQL. Déjà fait sur User (§3.3), reste les deux autres | Quand on veut |
+| Put/Patch/Delete sur User | Pour une future page « mon compte » (avec re-hash du password si modifié) | Si besoin |
 
 ---
 
@@ -253,3 +276,4 @@ docker compose exec backend php bin/console doctrine:fixtures:load --no-interact
 | 2026-07-02 | Fixtures et factories (Foundry) : comptes `demo`/`other@chillbox.dev`, dossiers et snippets de test (§8) |
 | 2026-07-02 | Login JWT (Lexik) : firewalls `login` + `api`, clés RS256, génération des clés dans `make install`. Testé de bout en bout : 401 sans token, cloisonnement par owner effectif (§6) |
 | 2026-07-02 | `OwnerProcessor` : `owner` rempli automatiquement au POST de Snippet et Folder. Le CRUD complet fonctionne (§4) |
+| 2026-07-02 | API User : inscription publique avec hash du password (`UserPasswordProcessor`), profil en `object == user`, password write-only, validation email/password (§3.3) |

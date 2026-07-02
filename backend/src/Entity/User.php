@@ -3,25 +3,43 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\State\UserPasswordProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Metadata\{ApiResource, Get, Post};
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
-#[ApiResource]
+#[UniqueEntity(fields: ['email'], message: 'Un compte existe déjà avec cet email.')]
+#[ApiResource(
+    normalizationContext:   ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
+    operations: [
+        // L'inscription : publique, le password est hashé par le processor
+        new Post(security: "is_granted('PUBLIC_ACCESS')", processor: UserPasswordProcessor::class),
+        // Son propre profil uniquement
+        new Get(security: "object == user"),
+    ]
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Groups(['user:read', 'user:write'])]
+    #[Assert\NotBlank]
+    #[Assert\Email]
     private ?string $email = null;
 
     /**
@@ -34,6 +52,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Groups(['user:write'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 8, minMessage: 'Le mot de passe doit faire au moins {{ limit }} caractères.')]
     private ?string $password = null;
 
     /**
