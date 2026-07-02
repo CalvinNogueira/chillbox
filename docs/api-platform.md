@@ -152,7 +152,28 @@ SELECT * FROM snippet
 
 Tout user connecté voit donc les snippets de **tout le monde**. Bob ne peut pas modifier ceux d'Alice (le `object.getOwner() == user` du `Put` le bloque), mais il peut les lire.
 
-**La solution :** une **extension de requête**. C'est une classe qui reçoit le `QueryBuilder` Doctrine juste avant l'exécution du SQL et peut le modifier. Tu la poses dans `src/Doctrine/`, elle implémente une (ou deux) interfaces, et Symfony la branche tout seul — zéro config :
+**La solution :** une **extension de requête**. C'est une classe qui reçoit le `QueryBuilder` Doctrine juste avant l'exécution du SQL et peut le modifier.
+
+**Comment elle se branche ?** Dès qu'une classe implémente `QueryCollectionExtensionInterface`, elle devient une extension : à la compilation du container, Symfony détecte l'interface (autoconfiguration) et l'ajoute à la liste que le provider d'API Platform déroule avant chaque requête de collection. Le `implements` **est** l'inscription — tu poses la classe dans `src/Doctrine/`, zéro config, zéro enregistrement manuel.
+
+À l'exécution, le provider (le service d'API Platform qui va chercher les données) fait en substance :
+
+```php
+$queryBuilder = $repository->createQueryBuilder('o');
+
+foreach ($this->extensions as $extension) {      // ta classe est dans cette liste
+    $extension->applyToCollection($queryBuilder, ...);
+}
+
+return $queryBuilder->getQuery()->getResult();   // le SQL ne part qu'ici
+```
+
+Deux choses à savoir sur cette liste :
+
+- **Tu n'y es pas seul** : la pagination, les `ApiFilter` et le tri d'API Platform sont eux-mêmes des extensions. Sur un `GET /api/snippets?title=react`, chacune empile sa clause (`WHERE title LIKE…`, `WHERE owner = …`, `LIMIT…`) sur le même QueryBuilder.
+- **Le provider distribue à l'aveugle** : chaque extension est appelée pour *toutes* les entités, et c'est son `if` en tête qui trie (« pas mon entité ? je ne touche à rien »).
+
+Les deux interfaces possibles :
 
 | Interface | Méthode | Appelée pour |
 | --- | --- | --- |

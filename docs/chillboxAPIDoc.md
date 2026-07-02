@@ -126,7 +126,17 @@ Fichier : `backend/src/Entity/User.php`. Juste `#[ApiResource]` : sans groupes d
 
 ### C'est quoi une extension ?
 
-Quand API Platform charge des données (étape 3 du pipeline §2), il construit un `QueryBuilder` Doctrine. Avant d'exécuter le SQL, il passe ce QueryBuilder à **toutes les classes qui implémentent les interfaces d'extension**. Pas d'enregistrement manuel : Symfony détecte l'interface (autoconfiguration) et branche la classe tout seul.
+Quand API Platform charge des données (étape 3 du pipeline §2), il construit un `QueryBuilder` Doctrine. Avant d'exécuter le SQL, il passe ce QueryBuilder à **toutes les classes qui implémentent les interfaces d'extension**.
+
+**Le mécanisme, en une phrase** : dès qu'une classe implémente `QueryCollectionExtensionInterface`, elle devient une extension — à la compilation du container, Symfony détecte l'interface (autoconfiguration) et l'ajoute à la liste que le provider d'API Platform déroule avant chaque requête de collection. Aucun enregistrement manuel : le `implements` **est** l'inscription.
+
+Trois points pour se le représenter :
+
+- **Le chef d'orchestre est le provider** (`CollectionProvider` / `ItemProvider` d'API Platform) : c'est lui qui tient la liste des extensions et les appelle une par une sur le QueryBuilder, puis exécute le SQL une fois la liste épuisée.
+- **Notre `OwnerExtension` n'est pas seule dans la liste** : la pagination, les `ApiFilter` et le tri d'API Platform sont eux-mêmes des extensions branchées par le même mécanisme. Chacune empile sa clause (`WHERE`, `LIMIT`, `ORDER BY`…) sur le même QueryBuilder.
+- **Le provider distribue à l'aveugle, chaque extension trie elle-même** : elles sont appelées pour *toutes* les entités, et c'est le `if` en tête de chaque extension qui décide « pas pour moi, je ne touche à rien ».
+
+Pour le vérifier : `docker compose exec backend php bin/console debug:container 'App\Doctrine\OwnerExtension'` montre les tags posés par l'autoconfiguration et les providers qui l'utilisent.
 
 Deux interfaces, une par type d'opération :
 
@@ -181,9 +191,26 @@ Deux interfaces, une par type d'opération :
 
 ---
 
+## 8. Données de test (fixtures)
+
+Pour remplir la base avec des données réalistes (dev uniquement) :
+
+```bash
+docker compose exec backend php bin/console doctrine:fixtures:load --no-interaction
+```
+
+⚠️ La commande **vide la base** avant de recharger.
+
+- **Outils** : `doctrine/doctrine-fixtures-bundle` (le chargement) + `zenstruck/foundry` (les factories, dans `backend/src/Factory/`). Une factory = des valeurs par défaut réalistes pour une entité, surchargables à l'appel : `SnippetFactory::createOne(['title' => 'Mon titre'])`.
+- **Scénario chargé** (`src/DataFixtures/AppFixtures.php`) : deux comptes connus, `demo@chillbox.dev` et `other@chillbox.dev` (mot de passe : `password`), chacun avec 2 dossiers de 3 snippets + 4 snippets hors dossier. Deux users distincts = de quoi tester le login **et** le cloisonnement par owner (§4).
+- Le hash du mot de passe est fait dans `UserFactory` (hook `afterInstantiate`), jamais stocké en clair.
+
+---
+
 ## Historique
 
 | Date | Changement |
 | --- | --- |
 | 2026-07-02 | Création du document. API Snippet : opérations + groupes + filtres + extension de filtrage par owner (collection et item) |
 | 2026-07-02 | API Folder configurée (groupes `folder:*`, sécurité, filtres, `owner` en lecture seule). Extension renommée `OwnerExtension` et étendue à Folder |
+| 2026-07-02 | Fixtures et factories (Foundry) : comptes `demo`/`other@chillbox.dev`, dossiers et snippets de test (§8) |

@@ -9,6 +9,8 @@ install:
 	@echo "Configuration de la base de données..."
 	sudo docker compose exec backend php bin/console doctrine:database:create --if-not-exists
 	sudo docker compose exec backend php bin/console doctrine:migrations:migrate -n --allow-no-migration
+	@echo "Chargement des données de test (fixtures)..."
+	sudo docker compose exec backend php bin/console doctrine:fixtures:load -n
 	@echo "======================================================"
 	@echo "🚀 Projet prêt !"
 	@echo "🌍 Frontend (Angular) : http://localhost:4200"
