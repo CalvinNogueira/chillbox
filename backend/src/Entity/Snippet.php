@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\SnippetRepository;
+use App\State\OwnerProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -18,7 +19,7 @@ use ApiPlatform\Doctrine\Orm\Filter\{SearchFilter, OrderFilter};
     operations: [
         new GetCollection(security: "is_granted('ROLE_USER')"),
         new Get(security: "is_granted('ROLE_USER')"),
-        new Post(security: "is_granted('ROLE_USER')"),
+        new Post(security: "is_granted('ROLE_USER')", processor: OwnerProcessor::class),
         new Put(security: "object.getOwner() == user"),
         new Patch(security: "object.getOwner() == user"),
         new Delete(security: "object.getOwner() == user"),

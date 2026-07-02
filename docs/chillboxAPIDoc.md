@@ -17,6 +17,7 @@ Dernière mise à jour : 2026-07-02
 | --- | --- |
 | `backend/src/Entity/` | Les entités Doctrine = la définition de l'API (routes, champs exposés, sécurité, filtres) |
 | `backend/src/Doctrine/` | Les extensions de requête : du SQL ajouté automatiquement par API Platform (voir §4) |
+| `backend/src/State/` | Les state processors : logique serveur juste avant la persistance (voir §4) |
 | `backend/src/Repository/` | Repositories Doctrine classiques (pas utilisés par l'API pour l'instant) |
 | `backend/config/packages/api_platform.yaml` | Config globale d'API Platform |
 | `backend/config/packages/security.yaml` | Firewalls et contrôle d'accès (auth pas encore branchée, voir §6) |
@@ -45,7 +46,7 @@ Requête HTTP
 5. Validation       Contraintes #[Assert\...] → 422 si invalide (pas encore en place)
    ▼
 6. State Processor  Persiste en base (flush Doctrine).
-   │                C'est ici qu'on branchera le remplissage auto de `owner` (§7)
+   │                C'est ici que `OwnerProcessor` remplit `owner` au POST (§4)
    ▼
 7. Sérialisation    L'objet est transformé en JSON, limité aux champs
    │                du groupe `*:read`
@@ -67,7 +68,7 @@ Fichier : `backend/src/Entity/Snippet.php`
 | --- | --- | --- | --- |
 | GET | `/api/snippets` | `ROLE_USER` | Ne renvoie **que les snippets du user connecté** (§4) |
 | GET | `/api/snippets/{id}` | `ROLE_USER` | 404 si le snippet appartient à un autre user (§4) |
-| POST | `/api/snippets` | `ROLE_USER` | ⚠️ `owner` pas encore rempli automatiquement (§7) |
+| POST | `/api/snippets` | `ROLE_USER` | `owner` = user connecté, rempli par `OwnerProcessor` (§4) |
 | PUT | `/api/snippets/{id}` | propriétaire uniquement | Remplacement complet |
 | PATCH | `/api/snippets/{id}` | propriétaire uniquement | Modification partielle |
 | DELETE | `/api/snippets/{id}` | propriétaire uniquement | |
@@ -109,7 +110,7 @@ Identiques à Snippet : GetCollection/Get/Post réservées à `ROLE_USER`, Put/P
 | `id` | ✅ | ❌ | Généré par la base |
 | `title` | ✅ | ✅ | |
 | `description` | ✅ | ✅ | Nullable |
-| `owner` | ✅ (en IRI) | ❌ | Non-écrivable, comme sur Snippet. ⚠️ Même souci qu'au §7 : pas encore rempli au POST |
+| `owner` | ✅ (en IRI) | ❌ | Non-écrivable, comme sur Snippet. Rempli au POST par `OwnerProcessor` (§4) |
 | `snippets` | ✅ (en IRI) | ✅ (en IRI) | Folder est le côté propriétaire du ManyToMany : `"snippets": ["/api/snippets/1"]` fonctionne à l'écriture |
 
 #### Filtres et tri (sur la collection)
@@ -122,7 +123,7 @@ Fichier : `backend/src/Entity/User.php`. Juste `#[ApiResource]` : sans groupes d
 
 ---
 
-## 4. `src/Doctrine/` — les extensions de requête
+## 4. `src/Doctrine/` et `src/State/` — nos branchements dans le pipeline
 
 ### C'est quoi une extension ?
 
@@ -162,6 +163,16 @@ Deux interfaces, une par type d'opération :
 - Le `user` vient du token JWT (§6). Sans token valide, le firewall renvoie 401 avant même d'arriver ici.
 
 **Pour ajouter une entité au filtrage** : ajouter sa classe dans le `in_array()` de `filterByOwner()` — à condition qu'elle ait un champ `owner`.
+
+### `State/OwnerProcessor.php` — le state processor
+
+Le problème symétrique de l'extension, mais en **écriture** : au POST, `owner` n'est pas écrivable par le client (groupes) et personne ne le remplit → `null` → l'INSERT planterait (`JoinColumn(nullable: false)`).
+
+**Fonctionnement** : un state processor est l'étape 6 du pipeline (§2), ce qui persiste en base. Le nôtre **décore** le processor Doctrine d'API Platform : il fait `setOwner($security->getUser())` si `owner` est vide, puis délègue la sauvegarde au processor d'origine (injecté via `#[Autowire]`).
+
+**Branchement** : contrairement aux extensions (automatiques via l'interface), un processor se déclare **explicitement sur l'opération** : `new Post(..., processor: OwnerProcessor::class)` sur Snippet et Folder. Uniquement sur `Post` — en PUT/PATCH l'entité a déjà son owner, et `Delete` utilise un autre processor (celui de suppression).
+
+**Vérifié** : un POST avec `"owner": "/api/users/2"` dans le payload est ignoré (pas dans le groupe write) et le snippet est quand même attribué au user connecté.
 
 ---
 
@@ -212,7 +223,6 @@ Le payload du token est du base64 **lisible par tous** (pas chiffré) — jamais
 
 | Tâche | Pourquoi | Quand |
 | --- | --- | --- |
-| State processor pour `owner` (Snippet **et** Folder) | Au POST, `owner` reste `null` (non-écrivable par le client, non rempli par le serveur) → erreur 500 SQL. Le processor fera `setOwner($security->getUser())` juste avant la persistance | Prochain chantier |
 | Sécuriser `User` (cacher `password`, restreindre les opérations, inscription avec hash du password) | Fuite du hash actuellement, voir §3.3 | Prochain chantier |
 | Validation (`#[Assert\NotBlank]` sur `title`, `code`…) | Un POST invalide doit donner un 422 propre, pas une 500 SQL | Quand on veut |
 
@@ -242,3 +252,4 @@ docker compose exec backend php bin/console doctrine:fixtures:load --no-interact
 | 2026-07-02 | API Folder configurée (groupes `folder:*`, sécurité, filtres, `owner` en lecture seule). Extension renommée `OwnerExtension` et étendue à Folder |
 | 2026-07-02 | Fixtures et factories (Foundry) : comptes `demo`/`other@chillbox.dev`, dossiers et snippets de test (§8) |
 | 2026-07-02 | Login JWT (Lexik) : firewalls `login` + `api`, clés RS256, génération des clés dans `make install`. Testé de bout en bout : 401 sans token, cloisonnement par owner effectif (§6) |
+| 2026-07-02 | `OwnerProcessor` : `owner` rempli automatiquement au POST de Snippet et Folder. Le CRUD complet fonctionne (§4) |
