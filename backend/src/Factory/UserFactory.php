@@ -27,6 +27,8 @@ final class UserFactory extends PersistentObjectFactory
             // mot de passe en clair ici, hashé dans initialize()
             'password' => 'password',
             'roles' => [],
+            'firstName' => self::faker()->firstName(),
+            'lastName' => self::faker()->lastName(),
         ];
     }
 

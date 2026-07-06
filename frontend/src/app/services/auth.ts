@@ -13,6 +13,16 @@ export class AuthService {
       .pipe(tap(({ token }) => localStorage.setItem('jwt', token)));
   }
 
+  getMe() {
+    // pas de header à poser car l'authInterceptor ajoute le Bearer sur toutes les requêtes
+    return this.http.get<{
+      id: number;
+      email: string;
+      firstName: string | null;
+      lastName: string | null;
+    }>('http://localhost:8000/api/me');
+  }
+
   get token(): string | null {
     return localStorage.getItem('jwt');
   }

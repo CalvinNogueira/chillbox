@@ -7,6 +7,7 @@
 }
 
 <div class="flex flex-col gap-3 max-w-2xl">
+  <app-hero />
   @for (snippet of snippets(); track snippet.id) {
   <app-snippet-box [snippet]="snippet" />
   } @empty { @if (!loading() && !error()) {
