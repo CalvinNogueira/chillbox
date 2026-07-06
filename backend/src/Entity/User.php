@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\State\CurrentUserProvider;
 use App\State\UserPasswordProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -24,8 +25,10 @@ use ApiPlatform\Metadata\{ApiResource, Get, Post};
     operations: [
         // L'inscription : publique, le password est hashé par le processor
         new Post(security: "is_granted('PUBLIC_ACCESS')", processor: UserPasswordProcessor::class),
-        // Son propre profil uniquement
+        // Ne sert qu'a générer les IRIs pour les relations, pas d'usage direct (ex : "owner": "/api/users/1")
         new Get(security: "object == user"),
+        // Le user connecté, identifié par son token (pas d'id dans l'URL)
+        new Get(uriTemplate: '/me', security: "is_granted('ROLE_USER')", provider: CurrentUserProvider::class),
     ]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
