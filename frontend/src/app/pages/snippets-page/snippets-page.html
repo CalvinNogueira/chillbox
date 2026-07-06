@@ -8,13 +8,7 @@
 
 <div class="flex flex-col gap-3 max-w-2xl">
   @for (snippet of snippets(); track snippet.id) {
-  <article class="border rounded p-3">
-    <h2 class="font-semibold">{{ snippet.title }}</h2>
-    @if (snippet.description) {
-    <p class="text-sm">{{ snippet.description }}</p>
-    }
-    <pre class="bg-gray-100 rounded p-2 mt-2 overflow-x-auto"><code>{{ snippet.code }}</code></pre>
-  </article>
+  <app-snippet-box [snippet]="snippet" />
   } @empty { @if (!loading() && !error()) {
   <p>Aucun snippet pour l'instant.</p>
   } }

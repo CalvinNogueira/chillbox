@@ -1,9 +1,10 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Snippet, SnippetsService } from '../../services/snippets';
+import { SnippetBox } from '../../components/snippets/snippet-box/snippet-box';
 
 @Component({
   selector: 'app-snippets-page',
-  imports: [],
+  imports: [SnippetBox],
   templateUrl: './snippets-page.html',
   styleUrl: './snippets-page.scss',
 })
