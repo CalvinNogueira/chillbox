@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
 @Component({
@@ -10,18 +11,16 @@ import { AuthService } from '../../services/auth';
 })
 export class LoginForm {
   private auth = inject(AuthService);
+  private router = inject(Router);
 
   email = '';
   password = '';
   error = '';
-  connected = false;
 
   onSubmit(): void {
     this.error = '';
     this.auth.login(this.email, this.password).subscribe({
-      // ponytail: pas encore de page d'accueil, on affiche juste "connecté" ;
-      // remplacer par router.navigate() quand la page snippets existera
-      next: () => (this.connected = true),
+      next: () => this.router.navigate(['/dashboard']),
       error: () => (this.error = 'Email ou mot de passe incorrect'),
     });
   }
