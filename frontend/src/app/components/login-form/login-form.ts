@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-login-form',
@@ -8,11 +9,20 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './login-form.scss',
 })
 export class LoginForm {
+  private auth = inject(AuthService);
+
   email = '';
   password = '';
+  error = '';
+  connected = false;
 
   onSubmit(): void {
-    // ponytail: juste un log pour l'instant, le vrai appel API viendra avec le service d'auth
-    console.log('login', this.email, this.password);
+    this.error = '';
+    this.auth.login(this.email, this.password).subscribe({
+      // ponytail: pas encore de page d'accueil, on affiche juste "connecté" ;
+      // remplacer par router.navigate() quand la page snippets existera
+      next: () => (this.connected = true),
+      error: () => (this.error = 'Email ou mot de passe incorrect'),
+    });
   }
 }

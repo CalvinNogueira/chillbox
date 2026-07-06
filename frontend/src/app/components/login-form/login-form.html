@@ -10,4 +10,11 @@
   </label>
 
   <button type="submit" class="border rounded px-2 py-1">Se connecter</button>
+
+  @if (error) {
+    <p class="text-red-600">{{ error }}</p>
+  }
+  @if (connected) {
+    <p class="text-green-600">Connecté !</p>
+  }
 </form>
