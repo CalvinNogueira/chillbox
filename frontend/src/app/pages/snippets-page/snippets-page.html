@@ -1,0 +1,21 @@
+<h1 class="text-xl font-bold mb-4">Mes snippets</h1>
+
+@if (loading()) {
+<p>Chargement…</p>
+} @if (error()) {
+<p class="text-red-600">Impossible de charger les snippets.</p>
+}
+
+<div class="flex flex-col gap-3 max-w-2xl">
+  @for (snippet of snippets(); track snippet.id) {
+  <article class="border rounded p-3">
+    <h2 class="font-semibold">{{ snippet.title }}</h2>
+    @if (snippet.description) {
+    <p class="text-sm">{{ snippet.description }}</p>
+    }
+    <pre class="bg-gray-100 rounded p-2 mt-2 overflow-x-auto"><code>{{ snippet.code }}</code></pre>
+  </article>
+  } @empty { @if (!loading() && !error()) {
+  <p>Aucun snippet pour l'instant.</p>
+  } }
+</div>

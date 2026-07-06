@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
@@ -15,13 +15,14 @@ export class LoginForm {
 
   email = '';
   password = '';
-  error = '';
+  // signal : modifié dans un callback HTTP, sans signal l'affichage ne serait pas rafraîchi (zoneless)
+  error = signal('');
 
   onSubmit(): void {
-    this.error = '';
+    this.error.set('');
     this.auth.login(this.email, this.password).subscribe({
       next: () => this.router.navigate(['/dashboard']),
-      error: () => (this.error = 'Email ou mot de passe incorrect'),
+      error: () => this.error.set('Email ou mot de passe incorrect'),
     });
   }
 }

@@ -11,7 +11,7 @@
 
   <button type="submit" class="border rounded px-2 py-1">Se connecter</button>
 
-  @if (error) {
-    <p class="text-red-600">{{ error }}</p>
+  @if (error()) {
+    <p class="text-red-600">{{ error() }}</p>
   }
 </form>
