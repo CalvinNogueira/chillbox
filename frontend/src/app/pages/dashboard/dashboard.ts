@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
 @Component({
@@ -10,10 +10,4 @@ import { AuthService } from '../../services/auth';
 })
 export class Dashboard {
   private auth = inject(AuthService);
-  private router = inject(Router);
-
-  logout(): void {
-    this.auth.logout();
-    this.router.navigate(['/login']);
-  }
 }

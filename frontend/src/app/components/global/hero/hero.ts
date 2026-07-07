@@ -11,6 +11,10 @@ import { AuthService } from '../../../services/auth';
 export class Hero {
   private auth = inject(AuthService);
 
+  logout() {
+    this.auth.logout();
+  }
+
   // toSignal : s'abonne à l'Observable et expose le résultat en signal.
   // Vaut undefined tant que la réponse HTTP n'est pas arrivée.
   user = toSignal(this.auth.getMe());

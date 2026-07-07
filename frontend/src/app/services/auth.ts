@@ -1,10 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
+  private router = inject(Router);
 
   // ponytail: URL en dur, à sortir dans environment.ts quand on déploiera ailleurs qu'en local
   login(email: string, password: string) {
@@ -33,5 +35,6 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('jwt');
+    this.router.navigate(['/login']);
   }
 }
