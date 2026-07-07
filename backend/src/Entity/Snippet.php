@@ -53,6 +53,10 @@ class Snippet
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
+    #[Groups(['snippet:read', 'snippet:write'])]
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $language = null;
+
     #[ORM\ManyToOne(inversedBy: 'snippets')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['snippet:read'])]
@@ -107,6 +111,18 @@ class Snippet
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getLanguage(): ?string
+    {
+        return $this->language;
+    }
+
+    public function setLanguage(?string $language): static
+    {
+        $this->language = $language;
 
         return $this;
     }

@@ -7,6 +7,7 @@ export interface Snippet {
   title: string;
   code: string;
   description?: string;
+  language?: string;
   folders: string[]; // IRIs, ex: "/api/folders/1"
 }
 

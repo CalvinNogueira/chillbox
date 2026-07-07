@@ -21,6 +21,7 @@ final class SnippetFactory extends PersistentObjectFactory
             'title' => self::faker()->sentence(3),
             'code' => sprintf("function %s() {\n    return '%s';\n}", self::faker()->word(), self::faker()->word()),
             'description' => self::faker()->optional()->sentence(),
+            'language' => self::faker()->randomElement(['php', 'javascript', 'typescript', 'python', 'css', 'sql']),
             'owner' => UserFactory::new(),
         ];
     }
