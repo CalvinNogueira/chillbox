@@ -46,7 +46,13 @@ export class SnippetsPostForm {
 
   submit() {
     this.snippetsService
-      .addSnippet(this.title, this.code, this.description, this.folder, this.language)
+      .addSnippet({
+        title: this.title,
+        code: this.code,
+        description: this.description,
+        language: this.language,
+        folders: this.folder ? [this.folder] : [],
+      })
       .subscribe({
         next: () => this.router.navigate(['/dashboard/snippets']),
         error: (error) => {
