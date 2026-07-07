@@ -1,0 +1,40 @@
+<form (ngSubmit)="submit()" class="flex flex-col gap-3 max-w-md border rounded p-4">
+  <label class="flex flex-col gap-1">
+    Titre
+    <input name="title" [(ngModel)]="title" required class="border rounded px-2 py-1" />
+  </label>
+
+  <label class="flex flex-col gap-1">
+    Langage
+    <select name="language" [(ngModel)]="language" class="border rounded px-2 py-1">
+      <option [ngValue]="null">— aucun —</option>
+      @for (lang of languages; track lang) {
+      <option [ngValue]="lang">{{ lang }}</option>
+      }
+    </select>
+  </label>
+
+  <label class="flex flex-col gap-1">
+    Code
+    <textarea
+      name="code"
+      [(ngModel)]="code"
+      required
+      rows="8"
+      spellcheck="false"
+      class="border rounded px-2 py-1 font-mono text-sm"
+    ></textarea>
+  </label>
+
+  <label class="flex flex-col gap-1">
+    Description (optionnelle)
+    <textarea
+      name="description"
+      [(ngModel)]="description"
+      rows="2"
+      class="border rounded px-2 py-1"
+    ></textarea>
+  </label>
+
+  <button type="submit" class="border rounded px-2 py-1 cursor-pointer">Créer le snippet</button>
+</form>
