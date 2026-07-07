@@ -2,10 +2,11 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { Snippet, SnippetsService } from '../../services/snippets';
 import { SnippetBox } from '../../components/snippets/snippet-box/snippet-box';
 import { Hero } from '../../components/global/hero/hero';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-snippets-page',
-  imports: [SnippetBox, Hero],
+  imports: [SnippetBox, Hero, RouterLink],
   templateUrl: './snippets-page.html',
   styleUrl: './snippets-page.scss',
 })
