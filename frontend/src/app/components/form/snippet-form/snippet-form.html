@@ -36,5 +36,7 @@
     ></textarea>
   </label>
 
-  <button type="submit" class="border rounded px-2 py-1 cursor-pointer">Créer le snippet</button>
+  <button type="submit" class="border rounded px-2 py-1 cursor-pointer">
+    {{ snippet() ? 'Enregistrer' : 'Créer le snippet' }}
+  </button>
 </form>

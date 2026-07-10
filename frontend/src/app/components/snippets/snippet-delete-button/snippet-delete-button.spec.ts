@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SnippetsPostForm } from './snippets-post-form';
+import { SnippetDeleteButton } from './snippet-delete-button';
 
-describe('SnippetsPostForm', () => {
-  let component: SnippetsPostForm;
-  let fixture: ComponentFixture<SnippetsPostForm>;
+describe('SnippetDeleteButton', () => {
+  let component: SnippetDeleteButton;
+  let fixture: ComponentFixture<SnippetDeleteButton>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SnippetsPostForm],
+      imports: [SnippetDeleteButton],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SnippetsPostForm);
+    fixture = TestBed.createComponent(SnippetDeleteButton);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

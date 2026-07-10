@@ -1,11 +1,13 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { codeToHtml } from 'shiki';
 import { Snippet } from '../../../services/snippets';
+import { SnippetDeleteButton } from '../snippet-delete-button/snippet-delete-button';
+import { SnippetModifyButton } from '../snippet-modify-button/snippet-modify-button';
 
 @Component({
   selector: 'app-snippet-box',
-  imports: [],
+  imports: [SnippetDeleteButton, SnippetModifyButton],
   templateUrl: './snippet-box.html',
   styleUrl: './snippet-box.scss',
 })
@@ -13,6 +15,9 @@ export class SnippetBox {
   private sanitizer = inject(DomSanitizer);
 
   snippet = input.required<Snippet>();
+  // relais des événements des boutons vers la page, qui tient la liste
+  deleted = output<number>();
+  modified = output<Snippet>();
 
   // HTML colorié par shiki, prêt pour [innerHTML]. Null le temps du rendu (asynchrone).
   highlighted = signal<SafeHtml | null>(null);

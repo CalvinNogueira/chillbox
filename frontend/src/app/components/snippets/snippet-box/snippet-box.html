@@ -2,17 +2,20 @@
   <div class="flex items-baseline justify-between">
     <h2 class="font-semibold">{{ snippet().title }}</h2>
     @if (snippet().language) {
-      <span class="text-xs text-gray-500">{{ snippet().language }}</span>
+    <span class="text-xs text-gray-500">{{ snippet().language }}</span>
     }
   </div>
   @if (snippet().description) {
-    <p class="text-sm">{{ snippet().description }}</p>
+  <p class="text-sm">{{ snippet().description }}</p>
+  } @if (highlighted(); as html) {
+  <div [innerHTML]="html"></div>
+  } @else {
+  <!-- affichage brut le temps que shiki rende (une fraction de seconde) -->
+  <pre class="rounded p-2 mt-2 overflow-x-auto"><code>{{ snippet().code }}</code></pre>
   }
 
-  @if (highlighted(); as html) {
-    <div [innerHTML]="html"></div>
-  } @else {
-    <!-- affichage brut le temps que shiki rende (une fraction de seconde) -->
-    <pre class="rounded p-2 mt-2 overflow-x-auto"><code>{{ snippet().code }}</code></pre>
-  }
+  <div class="flex gap-2 mt-2">
+    <app-snippet-modify-button [snippet]="snippet()" (modified)="modified.emit($event)" />
+    <app-snippet-delete-button [snippetId]="snippet().id" (deleted)="deleted.emit($event)" />
+  </div>
 </article>

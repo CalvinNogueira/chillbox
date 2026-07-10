@@ -1,0 +1,11 @@
+@if (editing()) {
+  <!-- [snippet] fourni → le formulaire est en mode édition : pré-rempli, PATCH au submit -->
+  <app-snippet-form [snippet]="snippet()" (saved)="onSaved($event)" />
+  <button (click)="editing.set(false)" class="border rounded px-2 py-1 text-sm cursor-pointer">
+    Annuler
+  </button>
+} @else {
+  <button (click)="editing.set(true)" class="border rounded px-2 py-1 text-sm cursor-pointer">
+    Modifier
+  </button>
+}

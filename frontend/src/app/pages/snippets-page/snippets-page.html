@@ -12,7 +12,7 @@
     Créer votre snippet
   </a>
   @for (snippet of snippets(); track snippet.id) {
-  <app-snippet-box [snippet]="snippet" />
+  <app-snippet-box [snippet]="snippet" (deleted)="onDeleted($event)" (modified)="onModified($event)" />
   } @empty { @if (!loading() && !error()) {
   <p>Aucun snippet pour l'instant.</p>
   } }

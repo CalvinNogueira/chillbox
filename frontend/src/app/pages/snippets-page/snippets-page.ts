@@ -31,4 +31,14 @@ export class SnippetsPage implements OnInit {
       },
     });
   }
+
+  // .update() : nouvelle valeur calculée à partir de l'ancienne (l'API a déjà été
+  // mise à jour par les boutons, on synchronise juste l'affichage)
+  onDeleted(id: number): void {
+    this.snippets.update((list) => list.filter((s) => s.id !== id));
+  }
+
+  onModified(updated: Snippet): void {
+    this.snippets.update((list) => list.map((s) => (s.id === updated.id ? updated : s)));
+  }
 }
