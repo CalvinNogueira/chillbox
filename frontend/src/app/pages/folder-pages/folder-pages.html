@@ -1,1 +1,20 @@
-<p>folder-pages works!</p>
+<div>
+  <app-hero />
+
+  <div>
+    @if (loading()) {
+      <p>Chargement…</p>
+    } @if (error()) {
+      <p class="text-red-600">Erreur lors du chargement des dossiers : {{ error() }}</p>
+    }
+  </div>
+
+  <div class="flex flex-col gap-3 max-w-2xl">
+    @for (folder of Folders(); track folder.id) {
+    <app-folder-box [folder]="folder" />
+    } @empty { @if (!loading() && !error()) {
+    <p>Aucun snippet pour l'instant.</p>
+    } }
+  </div>
+
+</div>
