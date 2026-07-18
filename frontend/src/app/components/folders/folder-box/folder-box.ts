@@ -1,4 +1,5 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
+import { Router } from '@angular/router';
 import { Folder } from '../../../services/folders';
 
 @Component({
@@ -7,9 +8,11 @@ import { Folder } from '../../../services/folders';
   styleUrl: './folder-box.scss',
 })
 export class FolderBox {
+  private router = inject(Router);
+
   folder = input.required<Folder>();
 
   onClick() {
-    // TODO : naviguer vers la page du folder
+    this.router.navigate(['/dashboard/folders', this.folder().id]);
   }
 }

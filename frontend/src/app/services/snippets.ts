@@ -26,6 +26,12 @@ export class SnippetsService {
       .pipe(map((response) => response.member)); // on déballe l'enveloppe Hydra (member, fait par API Platform)
   }
 
+  getSnippetsFromFolder(folderId: number) {
+    return this.http
+      .get<{ member: Snippet[] }>(`http://localhost:8000/api/snippets?folders=/api/folders/${folderId}`)
+      .pipe(map((response) => response.member));
+  }
+
   addSnippet(payload: SnippetPayload) {
     return this.http.post<Snippet>('http://localhost:8000/api/snippets', payload, {
       // API Platform n'accepte que le JSON-LD en écriture, donc on précise.
