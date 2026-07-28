@@ -1,0 +1,25 @@
+@import "../app.scss";
+
+.navigation-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navigation-title {
+  display: flex;
+  font-size: 28px;
+  h1 span {
+    font-weight: bold;
+    font-style: italic;
+    color: $mint;
+  }
+}
+
+.navigation-content {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  gap: 5rem;
+  justify-content: center;
+}
