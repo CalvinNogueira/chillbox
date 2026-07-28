@@ -1,0 +1,8 @@
+// le HTML injecté par [innerHTML] échappe à l'encapsulation des styles Angular,
+// d'où le ::ng-deep pour styler le <pre class="shiki"> produit par la lib
+::ng-deep .shiki {
+  overflow-x: auto;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+}

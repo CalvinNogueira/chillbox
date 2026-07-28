@@ -23,6 +23,13 @@ services:
     depends_on:
       - database
 
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+
   frontend:
     image: node:20-alpine
     working_dir: /app

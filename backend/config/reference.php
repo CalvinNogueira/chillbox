@@ -768,6 +768,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             property?: scalar|Param|null, // Default: null
  *             manager_name?: scalar|Param|null, // Default: null
  *         },
+ *         lexik_jwt?: array{
+ *             class?: scalar|Param|null, // Default: "Lexik\\Bundle\\JWTAuthenticationBundle\\Security\\User\\JWTUser"
+ *         },
  *     }>,
  *     firewalls?: array<string, array{ // Default: []
  *         pattern?: scalar|Param|null,
@@ -825,6 +828,10 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         remote_user?: array{
  *             provider?: scalar|Param|null,
  *             user?: scalar|Param|null, // Default: "REMOTE_USER"
+ *         },
+ *         jwt?: array{
+ *             provider?: scalar|Param|null, // Default: null
+ *             authenticator?: scalar|Param|null, // Default: "lexik_jwt_authentication.security.jwt_authenticator"
  *         },
  *         login_link?: array{
  *             check_route?: scalar|Param|null, // Route that will validate the login link - e.g. "app_login_link_verify".
@@ -1419,7 +1426,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         validation_error_resource_class?: scalar|Param|null, // The class used to represent validation errors in the OpenAPI documentation. // Default: null
  *     },
  *     maker?: bool|array{
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         namespace_prefix?: scalar|Param|null, // Add a prefix to all maker generated classes. e.g set it to "Api" to set the maker namespace to "App\Api\" (if the maker.root_namespace config is App). e.g. App\Api\State\MyStateProcessor // Default: ""
  *     },
  *     mcp?: bool|array{
@@ -1555,6 +1562,140 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         ...<string, mixed>
  *     },
  * }
+ * @psalm-type MakerConfig = array{
+ *     root_namespace?: scalar|Param|null, // Default: "App"
+ *     generate_final_classes?: bool|Param, // Default: true
+ *     generate_final_entities?: bool|Param, // Default: false
+ * }
+ * @psalm-type ZenstruckFoundryConfig = array{
+ *     auto_refresh_proxies?: bool|Param|null, // Deprecated: Since 2.0 auto_refresh_proxies defaults to true and this configuration has no effect. // Whether to auto-refresh proxies by default (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#auto-refresh) // Default: null
+ *     enable_auto_refresh_with_lazy_objects?: bool|Param|null, // Enable auto-refresh using PHP 8.4 lazy objects (cannot be enabled if PHP < 8.4). // Default: null
+ *     faker?: array{ // Configure the faker used by your factories.
+ *         locale?: scalar|Param|null, // The default locale to use for faker. // Default: null
+ *         seed?: scalar|Param|null, // Deprecated: The "faker.seed" configuration is deprecated and will be removed in 3.0. Use environment variable "FOUNDRY_FAKER_SEED" instead. // Random number generator seed to produce the same fake values every run. // Default: null
+ *         manage_seed?: bool|Param, // Automatically manage faker seed to ensure consistent data between test runs. // Default: true
+ *         service?: scalar|Param|null, // Service id for custom faker instance. // Default: null
+ *     },
+ *     instantiator?: array{ // Configure the default instantiator used by your object factories.
+ *         use_constructor?: bool|Param, // Use the constructor to instantiate objects. // Default: true
+ *         allow_extra_attributes?: bool|Param, // Whether or not to skip attributes that do not correspond to properties. // Default: false
+ *         always_force_properties?: bool|Param, // Whether or not to skip setters and force set object properties (public/private/protected) directly. // Default: false
+ *         service?: scalar|Param|null, // Service id of your custom instantiator. // Default: null
+ *     },
+ *     global_state?: list<scalar|Param|null>,
+ *     persistence?: array{
+ *         flush_once?: bool|Param, // Flush only once per call of `PersistentObjectFactory::create()` in userland. // Default: false
+ *     },
+ *     orm?: array{
+ *         auto_persist?: bool|Param, // Deprecated: Since 2.4 auto_persist defaults to true and this configuration has no effect. // Automatically persist entities when created. // Default: true
+ *         reset?: array{
+ *             connections?: list<scalar|Param|null>,
+ *             entity_managers?: list<scalar|Param|null>,
+ *             mode?: \Zenstruck\Foundry\ORM\ResetDatabase\ResetDatabaseMode::SCHEMA|\Zenstruck\Foundry\ORM\ResetDatabase\ResetDatabaseMode::MIGRATE|Param, // Reset mode to use with ResetDatabase trait // Default: "schema"
+ *             migrations?: array{
+ *                 configurations?: list<scalar|Param|null>,
+ *             },
+ *         },
+ *     },
+ *     mongo?: array{
+ *         auto_persist?: bool|Param, // Deprecated: Since 2.4 auto_persist defaults to true and this configuration has no effect. // Automatically persist documents when created. // Default: true
+ *         reset?: array{
+ *             document_managers?: list<scalar|Param|null>,
+ *         },
+ *     },
+ *     make_factory?: array{
+ *         default_namespace?: scalar|Param|null, // Default namespace where factories will be created by maker. // Default: "Factory"
+ *         add_hints?: bool|Param, // Add "beginner" hints in the created factory. // Default: true
+ *     },
+ *     make_story?: array{
+ *         default_namespace?: scalar|Param|null, // Default namespace where stories will be created by maker. // Default: "Story"
+ *     },
+ * }
+ * @psalm-type LexikJwtAuthenticationConfig = array{
+ *     public_key?: scalar|Param|null, // The key used to sign tokens (useless for HMAC). If not set, the key will be automatically computed from the secret key. // Default: null
+ *     additional_public_keys?: list<scalar|Param|null>,
+ *     secret_key?: scalar|Param|null, // The key used to sign tokens. It can be a raw secret (for HMAC), a raw RSA/ECDSA key or the path to a file itself being plaintext or PEM. // Default: null
+ *     pass_phrase?: scalar|Param|null, // The key passphrase (useless for HMAC) // Default: ""
+ *     token_ttl?: scalar|Param|null, // Default: 3600
+ *     allow_no_expiration?: bool|Param, // Allow tokens without "exp" claim (i.e. indefinitely valid, no lifetime) to be considered valid. Caution: usage of this should be rare. // Default: false
+ *     clock_skew?: scalar|Param|null, // Default: 0
+ *     encoder?: array{
+ *         service?: scalar|Param|null, // Default: "lexik_jwt_authentication.encoder.lcobucci"
+ *         signature_algorithm?: scalar|Param|null, // Default: "RS256"
+ *     },
+ *     user_id_claim?: scalar|Param|null, // Default: "username"
+ *     token_extractors?: array{
+ *         authorization_header?: bool|array{
+ *             enabled?: bool|Param, // Default: true
+ *             prefix?: scalar|Param|null, // Default: "Bearer"
+ *             name?: scalar|Param|null, // Default: "Authorization"
+ *         },
+ *         cookie?: bool|array{
+ *             enabled?: bool|Param, // Default: false
+ *             name?: scalar|Param|null, // Default: "BEARER"
+ *         },
+ *         query_parameter?: bool|array{
+ *             enabled?: bool|Param, // Default: false
+ *             name?: scalar|Param|null, // Default: "bearer"
+ *         },
+ *         split_cookie?: bool|array{
+ *             enabled?: bool|Param, // Default: false
+ *             cookies?: list<scalar|Param|null>,
+ *         },
+ *     },
+ *     remove_token_from_body_when_cookies_used?: scalar|Param|null, // Default: true
+ *     set_cookies?: array<string, array{ // Default: []
+ *         lifetime?: scalar|Param|null, // The cookie lifetime. If null, the "token_ttl" option value will be used // Default: null
+ *         samesite?: "none"|"lax"|"strict"|Param, // Default: "lax"
+ *         path?: scalar|Param|null, // Default: "/"
+ *         domain?: scalar|Param|null, // Default: null
+ *         secure?: scalar|Param|null, // Default: true
+ *         httpOnly?: scalar|Param|null, // Default: true
+ *         partitioned?: scalar|Param|null, // Default: false
+ *         split?: list<scalar|Param|null>,
+ *     }>,
+ *     api_platform?: bool|array{ // API Platform compatibility: add check_path in OpenAPI documentation.
+ *         enabled?: bool|Param, // Default: false
+ *         check_path?: scalar|Param|null, // The login check path to add in OpenAPI. // Default: null
+ *         username_path?: scalar|Param|null, // The path to the username in the JSON body. // Default: null
+ *         password_path?: scalar|Param|null, // The path to the password in the JSON body. // Default: null
+ *     },
+ *     access_token_issuance?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *         signature?: array{
+ *             algorithm?: scalar|Param|null, // The algorithm use to sign the access tokens.
+ *             key?: scalar|Param|null, // The signature key. It shall be JWK encoded.
+ *         },
+ *         encryption?: bool|array{
+ *             enabled?: bool|Param, // Default: false
+ *             key_encryption_algorithm?: scalar|Param|null, // The key encryption algorithm is used to encrypt the token.
+ *             content_encryption_algorithm?: scalar|Param|null, // The key encryption algorithm is used to encrypt the token.
+ *             key?: scalar|Param|null, // The encryption key. It shall be JWK encoded.
+ *         },
+ *     },
+ *     access_token_verification?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *         signature?: array{
+ *             header_checkers?: list<scalar|Param|null>,
+ *             claim_checkers?: list<scalar|Param|null>,
+ *             mandatory_claims?: list<scalar|Param|null>,
+ *             allowed_algorithms?: list<scalar|Param|null>,
+ *             keyset?: scalar|Param|null, // The signature keyset. It shall be JWKSet encoded.
+ *         },
+ *         encryption?: bool|array{
+ *             enabled?: bool|Param, // Default: false
+ *             continue_on_decryption_failure?: bool|Param, // If enable, non-encrypted tokens or tokens that failed during decryption or verification processes are accepted. // Default: false
+ *             header_checkers?: list<scalar|Param|null>,
+ *             allowed_key_encryption_algorithms?: list<scalar|Param|null>,
+ *             allowed_content_encryption_algorithms?: list<scalar|Param|null>,
+ *             keyset?: scalar|Param|null, // The encryption keyset. It shall be JWKSet encoded.
+ *         },
+ *     },
+ *     blocklist_token?: bool|array{
+ *         enabled?: bool|Param, // Default: false
+ *         cache?: scalar|Param|null, // Storage to track blocked tokens // Default: "cache.app"
+ *     },
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -1566,6 +1707,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     doctrine_migrations?: DoctrineMigrationsConfig,
  *     nelmio_cors?: NelmioCorsConfig,
  *     api_platform?: ApiPlatformConfig,
+ *     lexik_jwt_authentication?: LexikJwtAuthenticationConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1577,6 +1719,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         nelmio_cors?: NelmioCorsConfig,
  *         api_platform?: ApiPlatformConfig,
+ *         maker?: MakerConfig,
+ *         zenstruck_foundry?: ZenstruckFoundryConfig,
+ *         lexik_jwt_authentication?: LexikJwtAuthenticationConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1589,6 +1734,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         nelmio_cors?: NelmioCorsConfig,
  *         api_platform?: ApiPlatformConfig,
+ *         lexik_jwt_authentication?: LexikJwtAuthenticationConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1601,6 +1747,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         nelmio_cors?: NelmioCorsConfig,
  *         api_platform?: ApiPlatformConfig,
+ *         zenstruck_foundry?: ZenstruckFoundryConfig,
+ *         lexik_jwt_authentication?: LexikJwtAuthenticationConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

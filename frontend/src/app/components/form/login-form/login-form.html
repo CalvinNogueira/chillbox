@@ -1,0 +1,29 @@
+<form (ngSubmit)="onSubmit()" class="flex flex-col gap-3 w-64 border rounded p-4">
+  <label class="flex flex-col gap-1">
+    Email
+    <input
+      type="email"
+      name="email"
+      [(ngModel)]="email"
+      required
+      class="border rounded px-2 py-1"
+    />
+  </label>
+
+  <label class="flex flex-col gap-1">
+    Mot de passe
+    <input
+      type="password"
+      name="password"
+      [(ngModel)]="password"
+      required
+      class="border rounded px-2 py-1"
+    />
+  </label>
+
+  <button type="submit" class="border rounded px-2 py-1 cursor-pointer">Se connecter</button>
+
+  @if (error()) {
+  <p class="text-red-600">{{ error() }}</p>
+  }
+</form>
