@@ -1,4 +1,4 @@
-@import "../app.scss";
+@use "../../app" as *;
 .navigation-link {
   color: $darkmint;
   padding: 0.5rem;
