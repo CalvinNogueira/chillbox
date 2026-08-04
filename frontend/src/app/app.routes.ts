@@ -6,12 +6,14 @@ import { SnippetsPage } from './pages/snippets-page/snippets-page';
 import { SnippetsPostPages } from './pages/snippets-post-pages/snippets-post-pages';
 import { FolderPages } from './pages/folder-pages/folder-pages';
 import { FolderSnippetsPage } from './pages/folder-snippets-page/folder-snippets-page';
+import { SnippetDetailPage } from './pages/snippet-detail-page/snippet-detail-page';
 
 export const routes: Routes = [
   { path: 'login', component: LoginPage },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
   { path: 'dashboard/snippets', component: SnippetsPage, canActivate: [authGuard] },
+  { path: 'dashboard/snippets/:id', component: SnippetDetailPage, canActivate: [authGuard] },
   { path: 'dashboard/folders', component: FolderPages, canActivate: [authGuard] },
   { path: 'dashboard/folders/:id', component: FolderSnippetsPage, canActivate: [authGuard] },
   { path: 'dashboard/snippets-post', component: SnippetsPostPages, canActivate: [authGuard] },

@@ -1,0 +1,11 @@
+<app-hero />
+
+@if (loading()) {
+<p>Chargement…</p>
+} @if (error()) {
+<p class="text-red-600">Impossible de charger le snippet.</p>
+} @if (snippet(); as snippet) {
+<div class="max-w-2xl">
+  <app-snippet-box [snippet]="snippet" (deleted)="onDeleted()" (modified)="onModified($event)" />
+</div>
+}

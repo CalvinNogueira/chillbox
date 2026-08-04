@@ -3,20 +3,25 @@
 <h1 class="text-xl font-bold mb-4">Snippets du folder #{{ folderId }}</h1>
 
 @if (loading()) {
-<p>Chargement…</p>
-} @if (error()) {
-<p class="text-red-600">Impossible de charger les snippets.</p>
+  <p>Chargement…</p>
+}
+@if (error()) {
+  <p class="text-red-600">Impossible de charger les snippets.</p>
 }
 
 <ul class="flex flex-col gap-3 max-w-2xl">
   @for (snippet of snippets(); track snippet.id) {
-  <li class="border rounded p-3">
-    <span class="font-semibold">{{ snippet.title }}</span>
-    @if (snippet.language) {
-    <span class="text-xs text-gray-500 ml-2">{{ snippet.language }}</span>
+    <li class="border rounded p-3">
+      <a [routerLink]="['/dashboard/snippets', snippet.id]" class="font-semibold hover:underline">
+        {{ snippet.title }}
+      </a>
+      @if (snippet.language) {
+        <span class="text-xs text-gray-500 ml-2">{{ snippet.language }}</span>
+      }
+    </li>
+  } @empty {
+    @if (!loading() && !error()) {
+      <p>Aucun snippet dans ce dossier.</p>
     }
-  </li>
-  } @empty { @if (!loading() && !error()) {
-  <p>Aucun snippet dans ce dossier.</p>
-  } }
+  }
 </ul>

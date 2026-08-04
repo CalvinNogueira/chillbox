@@ -26,9 +26,16 @@ export class SnippetsService {
       .pipe(map((response) => response.member)); // on déballe l'enveloppe Hydra (member, fait par API Platform)
   }
 
+  // un seul snippet : l'API renvoie l'objet directement, pas d'enveloppe { member }
+  getSnippet(id: number) {
+    return this.http.get<Snippet>(`http://localhost:8000/api/snippets/${id}`);
+  }
+
   getSnippetsFromFolder(folderId: number) {
     return this.http
-      .get<{ member: Snippet[] }>(`http://localhost:8000/api/snippets?folders=/api/folders/${folderId}`)
+      .get<{
+        member: Snippet[];
+      }>(`http://localhost:8000/api/snippets?folders=/api/folders/${folderId}`)
       .pipe(map((response) => response.member));
   }
 

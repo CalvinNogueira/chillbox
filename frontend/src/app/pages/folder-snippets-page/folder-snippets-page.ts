@@ -1,11 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Snippet, SnippetsService } from '../../services/snippets';
 import { Hero } from '../../components/global/hero/hero';
 
 @Component({
   selector: 'app-folder-snippets-page',
-  imports: [Hero],
+  imports: [Hero, RouterLink],
   templateUrl: './folder-snippets-page.html',
   styleUrl: './folder-snippets-page.scss',
 })
