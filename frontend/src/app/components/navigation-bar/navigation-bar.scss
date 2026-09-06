@@ -1,0 +1,32 @@
+@use "../../app" as *;
+
+.navigation-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+  background: #f0ebe0;
+}
+
+.navigation-title {
+  display: flex;
+  align-items: center;
+  font-size: 28px;
+  h1 {
+    font-size: 22px;
+    margin-left: 0.5rem;
+  }
+  h1 span {
+    font-weight: bold;
+    font-style: italic;
+    color: $mint;
+  }
+}
+
+.navigation-content {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  gap: 5rem;
+  justify-content: center;
+}

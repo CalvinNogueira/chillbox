@@ -1,0 +1,10 @@
+@use "../../app" as *;
+.navigation-link {
+  color: $darkmint;
+  padding: 0.5rem;
+  font-weight: bold;
+  &:hover {
+    color: black;
+  }
+
+}

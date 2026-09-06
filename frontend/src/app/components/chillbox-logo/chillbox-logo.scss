@@ -1,0 +1,26 @@
+.eye {
+  /* Propriétés essentielles pour centrer l'animation sur l'oeil lui-même */
+  transform-box: fill-box;
+  transform-origin: center;
+
+  /* Clignement automatique infini (toutes les 4 secondes) */
+  animation: blink 4s infinite;
+}
+
+.chillbox-logo:hover {
+  animation: bounce 1s ease;
+}
+
+/* Keyframes pour le clignement régulier des deux yeux */
+@keyframes blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); } /* 0.1 aplatit l'arc pour simuler l'oeil fermé */
+}
+
+@keyframes bounce {
+  30% { transform: scale(1.2); }
+  40%, 60% { transform: rotate(-20deg) scale(1.2); }
+  50% { transform: rotate(20deg) scale(1.2); }
+  70% { transform: rotate(0deg) scale(1.2); }
+  100% { transform: scale(1); }
+}

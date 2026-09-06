@@ -3,4 +3,29 @@ $darkmint: #6a9080;
 $pink: #f8b8cc;
 $sun: #f5e090;
 $dark: #1a2820;
-$surface: #f2ede4;
+$surface: #F8E7C9;
+$darksurface: #E6D5B8;
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  width: 100%;
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: $surface;
+}
+
+nav {
+  flex-shrink: 0;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
