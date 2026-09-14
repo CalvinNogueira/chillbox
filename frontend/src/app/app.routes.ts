@@ -7,10 +7,11 @@ import { SnippetsPostPages } from './pages/snippets-post-pages/snippets-post-pag
 import { FolderPages } from './pages/folder-pages/folder-pages';
 
 export const routes: Routes = [
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'login', component: LoginPage },
-  // { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
   { path: 'dashboard/snippets', component: SnippetsPage, canActivate: [authGuard] },
   { path: 'dashboard/folders', component: FolderPages, canActivate: [authGuard] },
   { path: 'dashboard/snippets-post', component: SnippetsPostPages, canActivate: [authGuard] },
+  { path: '**', redirectTo: '' },
 ];

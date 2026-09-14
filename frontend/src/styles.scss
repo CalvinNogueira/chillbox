@@ -1,1 +1,13 @@
 @use "tailwindcss";
+
+// Palette du projet exposée à Tailwind : donne bg-mint, text-dark, border-darksurface...
+// Mêmes valeurs que les variables SCSS de app.scss (encore utilisées par la navbar).
+@theme {
+  --color-mint: #7dd8c4;
+  --color-darkmint: #6a9080;
+  --color-pink: #f8b8cc;
+  --color-sun: #f5e090;
+  --color-dark: #1a2820;
+  --color-surface: #f8e7c9;
+  --color-darksurface: #e6d5b8;
+}

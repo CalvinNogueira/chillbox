@@ -1,13 +1,13 @@
 <nav class="navigation-bar">
-  <a class="navigation-title" href="/">
+  <a class="navigation-title" routerLink="/">
     <app-chillbox-logo />
     <h1>Chill<span>box</span></h1>
   </a>
 
   <div class="navigation-content">
-    <app-navigation-link linkString="Accueil" linkStringHref="/"></app-navigation-link>
-    <app-navigation-link linkString="Outils" linkStringHref="/"></app-navigation-link>
-    <app-navigation-link linkString="Snippets" linkStringHref="/api"></app-navigation-link>
+    <app-navigation-link linkString="Accueil" linkStringHref="/dashboard"></app-navigation-link>
+    <app-navigation-link linkString="Outils" linkStringHref="/dashboard/folders"></app-navigation-link>
+    <app-navigation-link linkString="Snippets" linkStringHref="/dashboard/snippets"></app-navigation-link>
     @if (!isLogged()) {
       <app-navigation-link linkString="LOGIN" linkStringHref="/login"></app-navigation-link>
     }
