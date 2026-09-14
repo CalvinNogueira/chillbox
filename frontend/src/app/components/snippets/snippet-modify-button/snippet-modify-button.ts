@@ -7,6 +7,8 @@ import { SnippetForm } from '../../form/snippet-form/snippet-form';
   imports: [SnippetForm],
   templateUrl: './snippet-modify-button.html',
   styleUrl: './snippet-modify-button.scss',
+  // en édition le formulaire prend toute la largeur de la carte
+  host: { '[class.w-full]': 'editing()' },
 })
 export class SnippetModifyButton {
   // input = donnée fournie par le parent ([snippet]="...", obligatoire, lue via this.snippet())
