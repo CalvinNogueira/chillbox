@@ -27,6 +27,13 @@ services:
     image: adminer
     ports:
       - "8080:8080"
+    environment:
+      ADMINER_DRIVER: pgsql
+      ADMINER_SERVER: database
+      ADMINER_USERNAME: app_user
+      ADMINER_PASSWORD: app_password
+      ADMINER_DB: app_db
+      ADMINER_AUTOLOGIN: 1
     depends_on:
       - database
 
