@@ -1,0 +1,7 @@
+gesdinet_jwt_refresh_token:
+    refresh_token_class: App\Entity\RefreshToken
+    # Chaque refresh supprime l'ancien refresh_token et en renvoie un nouveau
+    single_use: true
+    # Ajoute refresh_token et la route /api/token/refresh à la doc Swagger d'API Platform
+    api_platform:
+        enabled: true
